@@ -50,27 +50,66 @@ app.get("/posts", (req, res) => {
 app.get("/posts/:id", (req, res) => {
   const id = parseInt(req.params.id);
   const specificPost = posts.find((post) => post.id === id);
+
+  //if문으로 404 status 추가해주기
+  if (!specificPost) return res.status(404).json({message: "Post not found"});
+
   res.json(specificPost);
 })
 
 //CHALLENGE 3: POST a new post
-app.post("/post", (req, res) => {
+//server에서 api url 체크!!!
+
+app.post("/posts", (req, res) => {
+  const newId = lastID += 1;
   const newPost = {
     id: posts.length+1,
+    // id:  newId 이렇게도 작성가능
     title: req.body.title,
     content: req.body.content,
     author: req.body.author,
     // date: req.body.date,
+    date: new Date(),
   }
+  //lastId= nenwID;
+  //다음번 post요청시 숫자 늘어남
+
   posts.push(newPost);
   // console.log(posts.slice(-1));
   res.json(post);
 })
 
 //CHALLENGE 4: PATCH a post when you just want to update one parameter
+app.patch("/posts/:id", (req, res) => {
+  var id = parseInt(req.params.id);
+  const selectedPost = posts.find((p) => p.id === id);
+  if (!selectedPost) {
+    return res.status(404).json({message: "post not found"});
+  };
+  const editedPost = {
+    id: id,
+    title: req.body.title || selectedPost.title,
+    content: req.body.content || selectedPost.content,
+    author: req.body.author || selectedPost.author,
+    date: new Date(),
+  };
+  posts[id] = editedPost;
+  res.json(editedPost);
+})
 
 
 //CHALLENGE 5: DELETE a specific post by providing the post id.
+app.delete("/posts/:id", (req, res) => {
+  
+  const id = parseInt(req.params.id);
+  const selectedInndex = posts.findIndex((p) => p.id === id);
+  if (selectedInndex === -1) {
+    return res.status(404).json({ message: "post not found"});
+  }
+  posts.splice(selectedInndex, 1);
+  res.status(202).json({message: "successfully deleted"})
+  
+})
 
 app.listen(port, () => {
   console.log(`API is running at http://localhost:${port}`);
